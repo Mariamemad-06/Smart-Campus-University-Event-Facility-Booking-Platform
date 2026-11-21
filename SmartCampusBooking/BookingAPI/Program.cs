@@ -1,9 +1,18 @@
+
+using BookingAPI.Data;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+
+// Register SQL Server database
+builder.Services.AddDbContext<BookingDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// OpenAPI
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
