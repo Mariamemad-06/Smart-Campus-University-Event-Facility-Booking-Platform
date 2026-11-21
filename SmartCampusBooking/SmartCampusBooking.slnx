@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="BookingAPI/BookingAPI.csproj" />
+  <Project Path="BookingMVC/BookingMVC.csproj" Id="028b7c0e-0620-434f-adb5-08f20c147dd6" />
+</Solution>
