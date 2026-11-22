@@ -1,0 +1,60 @@
+﻿@model BookingMVC.Models.CreateBookingViewModel
+
+@{
+    ViewData["Title"] = "Create Booking";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4">Book a Facility</h2>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <form asp-controller="Bookings" asp-action="Create" method="post">
+
+        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+        <div class="mb-3">
+            <label asp-for="UserId" class="form-label">User ID</label>
+            <input asp-for="UserId" class="form-control" placeholder="Enter your User ID" />
+            <span asp-validation-for="UserId" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="FacilityId" class="form-label">Facility ID</label>
+            <input asp-for="FacilityId" class="form-control" type="number" min="1" />
+            <span asp-validation-for="FacilityId" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="StartTime" class="form-label">Start Time</label>
+            <input asp-for="StartTime" class="form-control" type="datetime-local" />
+            <span asp-validation-for="StartTime" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="EndTime" class="form-label">End Time</label>
+            <input asp-for="EndTime" class="form-control" type="datetime-local" />
+            <span asp-validation-for="EndTime" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="NumberOfPeople" class="form-label">Number of People</label>
+            <input asp-for="NumberOfPeople" class="form-control" type="number" min="1" />
+            <span asp-validation-for="NumberOfPeople" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            Confirm Booking
+        </button>
+
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
