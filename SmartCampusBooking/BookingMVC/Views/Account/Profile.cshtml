@@ -1,0 +1,48 @@
+﻿@using System.Security.Claims
+
+@{
+    ViewData["Title"] = "My Profile";
+
+    var fullName = User.Identity?.Name ?? "Unknown";
+    var email = User.FindFirst(ClaimTypes.Email)?.Value ?? "Unknown";
+    var role = User.FindFirst(ClaimTypes.Role)?.Value ?? "Unknown";
+    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "Unknown";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4">
+
+                    <h2 class="mb-4">My Profile</h2>
+
+                    <dl class="row">
+                        <dt class="col-sm-4">Full Name</dt>
+                        <dd class="col-sm-8">@fullName</dd>
+
+                        <dt class="col-sm-4">Email</dt>
+                        <dd class="col-sm-8">@email</dd>
+
+                        <dt class="col-sm-4">Role</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge bg-primary">@role</span>
+                        </dd>
+
+                        <dt class="col-sm-4">User ID</dt>
+                        <dd class="col-sm-8 text-break">@userId</dd>
+                    </dl>
+
+                    <a asp-controller="Home"
+                       asp-action="Index"
+                       class="btn btn-outline-primary mt-3">
+                        Back to Dashboard
+                    </a>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

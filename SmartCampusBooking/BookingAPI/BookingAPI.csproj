@@ -7,7 +7,44 @@
     <UserSecretsId>fefdbc3f-6227-4b6d-9c2c-0f0311bf626c</UserSecretsId>
   </PropertyGroup>
 
+
   <ItemGroup>
+    <None Include="Controllers\AuthController.cs">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>AuthController.txt</LastGenOutput>
+    </None>
+    <None Include="DTOs\LoginRequest.cs">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>LoginRequest.cs</LastGenOutput>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>LoginRequest.cs</DependentUpon>
+    </None>
+    <None Include="DTOs\RegisterRequest.cs">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>RegisterRequest.cs</LastGenOutput>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>RegisterRequest.cs</DependentUpon>
+    </None>
+    <None Include="Models\Role.cs">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Role.cs</LastGenOutput>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Role.cs</DependentUpon>
+    </None>
+    <None Include="Models\User.cs">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>User.cs</LastGenOutput>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>User.cs</DependentUpon>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.15" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.15" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.15" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.15">
@@ -15,6 +52,38 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
 	  <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.15" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="DTOs\RegisterRequest.txt">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>RegisterRequest.cs</DependentUpon>
+    </None>
+    <None Update="DTOs\LoginRequest.txt">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>LoginRequest.cs</DependentUpon>
+    </None>
+    <None Update="Controllers\AuthController.txt">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>AuthController.cs</DependentUpon>
+    </None>
+    <None Update="Models\Role.txt">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Role.cs</DependentUpon>
+    </None>
+    <None Update="Models\User.txt">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>User.cs</DependentUpon>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
   </ItemGroup>
 
 </Project>

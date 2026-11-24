@@ -2,9 +2,12 @@
 using BookingMVC.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Json;
-
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication;
+using System.Net.Http.Headers;
 namespace BookingMVC.Controllers
 {
+    [Authorize(Roles = "Student,Faculty")]
     public class BookingsController : Controller
     {
         private readonly IHttpClientFactory _httpClientFactory;
@@ -29,6 +32,16 @@ namespace BookingMVC.Controllers
             }
 
             var client = _httpClientFactory.CreateClient("BookingApi");
+
+            var token = await HttpContext.GetTokenAsync("access_token");
+
+            if (string.IsNullOrEmpty(token))
+            {
+                return Challenge();
+            }
+
+            client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", token);
 
             var response = await client.PostAsJsonAsync(
                 "api/bookings", model);

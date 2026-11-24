@@ -1,0 +1,7 @@
+# Use this workspace to collaborate
+workspace:
+  id: 7467351a-fa82-441b-8749-5664f761cd0c
+
+localResources:
+  specs:
+    - ../BookingAPI/obj/Debug/net10.0/EndpointInfo/BookingAPI.json
