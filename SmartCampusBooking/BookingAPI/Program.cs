@@ -10,9 +10,50 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 // Existing SQL Server database
+
 builder.Services.AddDbContext<BookingDbContext>(options =>
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+        builder.Configuration.GetConnectionString("DefaultConnection"))
+    .UseSeeding((context, _) =>
+    {
+        string[] roleNames = { "Student", "Faculty", "Admin" };
+
+        foreach (var roleName in roleNames)
+        {
+            if (!context.Set<BookingAPI.Models.Role>()
+                .Any(r => r.RoleName == roleName))
+            {
+                context.Set<BookingAPI.Models.Role>().Add(
+                    new BookingAPI.Models.Role
+                    {
+                        RoleName = roleName
+                    });
+            }
+        }
+
+        context.SaveChanges();
+    })
+    .UseAsyncSeeding(async (context, _, cancellationToken) =>
+    {
+        string[] roleNames = { "Student", "Faculty", "Admin" };
+
+        foreach (var roleName in roleNames)
+        {
+            if (!await context.Set<BookingAPI.Models.Role>()
+                .AnyAsync(r => r.RoleName == roleName,
+                          cancellationToken))
+            {
+                context.Set<BookingAPI.Models.Role>().Add(
+                    new BookingAPI.Models.Role
+                    {
+                        RoleName = roleName
+                    });
+            }
+        }
+
+        await context.SaveChangesAsync(cancellationToken);
+    }));
+
 
 // JWT authentication
 var jwtKey = builder.Configuration["Jwt:Key"]
