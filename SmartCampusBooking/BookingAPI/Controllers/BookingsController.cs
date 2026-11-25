@@ -2,8 +2,11 @@
 using BookingAPI.Data;
 using BookingAPI.Extensions;
 using BookingAPI.Models;
+using BookingAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace BookingAPI.Controllers
 {
@@ -12,10 +15,12 @@ namespace BookingAPI.Controllers
     public class BookingsController : ControllerBase
     {
         private readonly BookingDbContext _context;
+        private readonly INotificationService _notificationService;
 
-        public BookingsController(BookingDbContext context)
+        public BookingsController(BookingDbContext context,INotificationService notificationService)
         {
             _context = context;
+            _notificationService = notificationService;
         }
 
         [HttpPost]
@@ -110,6 +115,46 @@ namespace BookingAPI.Controllers
                 .ToList();
 
             return Ok(bookings);
+        }
+
+        [HttpPut("{id}/cancel")]
+        [Authorize]
+        public async Task<IActionResult> CancelBooking(int id)
+        {
+            var userId = User.GetUserId();
+
+            var booking = await _context.Bookings
+                .Include(b => b.Facility)
+                .FirstOrDefaultAsync(b => b.Id == id && b.UserId == userId);
+
+            if (booking == null)
+            {
+                return NotFound("Booking not found.");
+            }
+
+            if (booking.Status == "Cancelled")
+            {
+                return BadRequest("Booking is already cancelled.");
+            }
+
+            booking.Status = "Cancelled";
+
+            await _context.SaveChangesAsync();
+
+            // Create automatic notification
+            await _notificationService.CreateAsync(
+                userId,
+                "Booking Cancelled",
+                $"Your booking for {booking.Facility?.Name} has been cancelled successfully.",
+                NotificationTypes.BookingCancelled,
+                booking.Id
+            );
+
+            return Ok(new
+            {
+                Message = "Booking cancelled successfully.",
+                BookingId = booking.Id
+            });
         }
     }
 }
