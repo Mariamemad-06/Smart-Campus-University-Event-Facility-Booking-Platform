@@ -1,6 +1,8 @@
 ﻿
 using BookingAPI.Data;
+using BookingAPI.Extensions;
 using BookingAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookingAPI.Controllers
@@ -86,6 +88,28 @@ namespace BookingAPI.Controllers
                 booking.StartTime,
                 booking.EndTime
             });
+        }
+
+        [HttpGet("my-bookings")]
+        [Authorize]
+        public IActionResult GetMyBookings()
+        {
+            var userId = User.GetUserId();
+
+            var bookings = _context.Bookings
+                .Where(b => b.UserId == userId)
+                .Select(b => new
+                {
+                    b.Id,
+                    b.FacilityId,
+                    FacilityName = b.Facility.Name,
+                    b.StartTime,
+                    b.EndTime,
+                    b.Status
+                })
+                .ToList();
+
+            return Ok(bookings);
         }
     }
 }
