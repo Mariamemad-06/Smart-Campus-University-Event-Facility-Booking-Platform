@@ -1,0 +1,173 @@
+﻿@model List<BookingMVC.Models.NotificationViewModel>
+
+@{
+    ViewData["Title"] = "My Notifications";
+    var unreadCount = ViewBag.UnreadCount ?? 0;
+}
+
+<div class="container py-4">
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
+        <div>
+            <h1 class="fw-bold mb-1">My Notifications</h1>
+            <p class="text-muted mb-0">
+                Stay updated with your bookings and important announcements.
+            </p>
+        </div>
+
+        <span class="badge bg-primary fs-6 rounded-pill px-3 py-2">
+            Unread: @unreadCount
+        </span>
+    </div>
+
+    <!-- Success Message -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close"
+                    data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Error Message -->
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="alert alert-danger">
+            Failed to load notifications:
+            @ViewBag.ErrorMessage
+        </div>
+    }
+
+    <!-- Mark All as Read -->
+    @if (Model.Any(n => !n.IsRead))
+    {
+        <div class="d-flex justify-content-end mb-3">
+            <form asp-controller="Notifications"
+                  asp-action="MarkAllRead"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <button type="submit"
+                        class="btn btn-outline-primary">
+                    Mark All as Read
+                </button>
+            </form>
+        </div>
+    }
+
+    <!-- Notifications List -->
+    @if (!Model.Any())
+    {
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body text-center py-5">
+
+                <h3 class="mb-3">You're all caught up!</h3>
+
+                <p class="text-muted mb-0">
+                    You don't have any notifications yet.
+                    New updates will appear here.
+                </p>
+
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="d-flex flex-column gap-3">
+
+            @foreach (var notification in Model)
+            {
+                <div class="card shadow-sm rounded-4
+                    @(notification.IsRead
+    ? "border-0"
+    : "border-primary border-2")">
+
+                    <div class="card-body p-4">
+
+                        <div class="d-flex justify-content-between
+                            align-items-start flex-wrap gap-2 mb-2">
+
+                            <div>
+                                <h5 class="fw-bold mb-1">
+                                    @notification.Title
+                                </h5>
+
+                                <span class="badge bg-secondary">
+                                    @notification.Type
+                                </span>
+
+                                @if (notification.IsRead)
+                                {
+                                    <span class="badge bg-success">
+                                        Read
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-primary">
+                                        Unread
+                                    </span>
+                                }
+                            </div>
+
+                            <small class="text-muted">
+                                @notification.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy - hh:mm tt")
+                            </small>
+
+                        </div>
+
+                        <p class="mb-3">
+                            @notification.Message
+                        </p>
+
+                        @if (notification.RelatedBookingId.HasValue)
+                        {
+                            <p class="small text-muted mb-3">
+                                Related Booking:
+                                #@notification.RelatedBookingId
+                            </p>
+                        }
+
+                        @if (!notification.IsRead)
+                        {
+                            <form asp-controller="Notifications"
+                                  asp-action="MarkRead"
+                                  asp-route-id="@notification.Id"
+                                  method="post">
+
+                                @Html.AntiForgeryToken()
+
+                                <button type="submit"
+                                        class="btn btn-sm btn-outline-primary">
+                                    Mark as Read
+                                </button>
+                            </form>
+                        }
+
+                    </div>
+                </div>
+            }
+
+        </div>
+    }
+
+    <!-- Back to Dashboard -->
+    <div class="mt-4">
+        <a asp-controller="Home"
+           asp-action="Index"
+           class="btn btn-outline-secondary">
+            Back to Dashboard
+        </a>
+    </div>
+
+</div>

@@ -29,3 +29,81 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+/* Notification Bell */
+.notification-link {
+    display: flex;
+    align-items: center;
+}
+
+.notification-bell-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.notification-bell-icon {
+    color: #ffc107;
+    transition: transform 0.2s ease;
+}
+
+/* Bell hover effect */
+.notification-link:hover .notification-bell-icon {
+    color: #e0a800;
+}
+
+/* Red notification count badge */
+.notification-badge {
+    position: absolute;
+    top: -7px;
+    right: -10px;
+    min-width: 19px;
+    height: 19px;
+    padding: 0 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #dc3545;
+    color: white;
+    border-radius: 50px;
+    font-size: 11px;
+    font-weight: bold;
+    line-height: 1;
+}
+
+/* Ringing animation */
+.notification-bell-icon.ringing {
+    animation: ringBell 0.8s ease-in-out 2;
+    transform-origin: top center;
+}
+
+@keyframes ringBell {
+    0% {
+        transform: rotate(0);
+    }
+
+    15% {
+        transform: rotate(15deg);
+    }
+
+    30% {
+        transform: rotate(-15deg);
+    }
+
+    45% {
+        transform: rotate(12deg);
+    }
+
+    60% {
+        transform: rotate(-12deg);
+    }
+
+    75% {
+        transform: rotate(6deg);
+    }
+
+    100% {
+        transform: rotate(0);
+    }
+}
