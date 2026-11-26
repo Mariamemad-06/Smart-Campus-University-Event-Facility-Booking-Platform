@@ -24,7 +24,7 @@ namespace BookingAPI.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateBooking(CreateBookingRequest request)
+        public async Task<IActionResult> CreateBookingAsync(CreateBookingRequest request)
         {
             //Get validated date values
             var startTime = request.StartTime!.Value;
@@ -84,6 +84,15 @@ namespace BookingAPI.Controllers
             //Save booking to database
             _context.Bookings.Add(booking);
             _context.SaveChanges();
+
+            // Create automatic booking confirmation notification
+            await _notificationService.CreateAsync(
+                booking.UserId,
+                "Booking Confirmed",
+                $"Your booking for {facility.Name} has been confirmed successfully.",
+                NotificationTypes.BookingConfirmed,
+                booking.Id
+            );
 
             return Ok(new
             {

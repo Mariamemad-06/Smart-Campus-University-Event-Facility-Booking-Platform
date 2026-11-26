@@ -53,7 +53,7 @@ namespace BookingMVC.Controllers
                 TempData["SuccessMessage"] =
                     $"Booking created successfully! Your Booking ID is {result?.BookingId}.";
 
-                return RedirectToAction("Create");
+                return RedirectToAction("MyBookings");
             }
 
             var errorMessage = await response.Content.ReadAsStringAsync();
