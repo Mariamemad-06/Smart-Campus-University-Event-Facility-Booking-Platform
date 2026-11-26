@@ -13,6 +13,7 @@ namespace BookingAPI.Data
 
         public DbSet<Facility> Facilities { get; set; }
         public DbSet<Booking> Bookings { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
@@ -33,6 +34,16 @@ namespace BookingAPI.Data
             modelBuilder.Entity<Role>()
                 .HasIndex(r => r.RoleName)
                 .IsUnique();
+
+            modelBuilder.Entity<Notification>(e =>
+            {
+                e.HasIndex(n => new { n.UserId, n.IsRead });
+
+                e.HasOne(n => n.User)
+                 .WithMany()                       // no collection on User
+                 .HasForeignKey(n => n.UserId)
+                 .OnDelete(DeleteBehavior.Cascade); // deleting a user removes their notifications
+            });
         }
 
     }

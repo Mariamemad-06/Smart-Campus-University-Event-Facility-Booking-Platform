@@ -53,7 +53,7 @@ namespace BookingMVC.Controllers
                 TempData["SuccessMessage"] =
                     $"Booking created successfully! Your Booking ID is {result?.BookingId}.";
 
-                return RedirectToAction("Create");
+                return RedirectToAction("MyBookings");
             }
 
             var errorMessage = await response.Content.ReadAsStringAsync();
@@ -61,6 +61,73 @@ namespace BookingMVC.Controllers
             ModelState.AddModelError(string.Empty, errorMessage);
 
             return View(model);
+        }
+
+        private async Task<HttpClient?> GetAuthorizedClient()
+        {
+            var token = await HttpContext.GetTokenAsync("access_token");
+
+            if (string.IsNullOrEmpty(token))
+                return null;
+
+            var client = _httpClientFactory.CreateClient("BookingApi");
+
+            client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", token);
+
+            return client;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> MyBookings()
+        {
+            var client = await GetAuthorizedClient();
+
+            if (client == null)
+                return Challenge();
+
+            var response = await client.GetAsync(
+                "api/bookings/my-bookings");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                ViewBag.ErrorMessage =
+                    await response.Content.ReadAsStringAsync();
+
+                return View(new List<BookingViewModel>());
+            }
+
+            var bookings = await response.Content
+                .ReadFromJsonAsync<List<BookingViewModel>>();
+
+            return View(bookings ?? new List<BookingViewModel>());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Cancel(int id)
+        {
+            var client = await GetAuthorizedClient();
+
+            if (client == null)
+                return Challenge();
+
+            var response = await client.PutAsync(
+                $"api/bookings/{id}/cancel", null);
+
+            if (response.IsSuccessStatusCode)
+            {
+                TempData["SuccessMessage"] =
+                    "Booking cancelled successfully!";
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+
+                TempData["ErrorMessage"] = error;
+            }
+
+            return RedirectToAction(nameof(MyBookings));
         }
     }
 

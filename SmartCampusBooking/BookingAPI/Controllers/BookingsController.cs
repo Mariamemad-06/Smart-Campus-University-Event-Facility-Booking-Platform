@@ -1,7 +1,12 @@
 ﻿
 using BookingAPI.Data;
+using BookingAPI.Extensions;
 using BookingAPI.Models;
+using BookingAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace BookingAPI.Controllers
 {
@@ -10,14 +15,16 @@ namespace BookingAPI.Controllers
     public class BookingsController : ControllerBase
     {
         private readonly BookingDbContext _context;
+        private readonly INotificationService _notificationService;
 
-        public BookingsController(BookingDbContext context)
+        public BookingsController(BookingDbContext context,INotificationService notificationService)
         {
             _context = context;
+            _notificationService = notificationService;
         }
 
         [HttpPost]
-        public IActionResult CreateBooking(CreateBookingRequest request)
+        public async Task<IActionResult> CreateBookingAsync(CreateBookingRequest request)
         {
             //Get validated date values
             var startTime = request.StartTime!.Value;
@@ -78,6 +85,15 @@ namespace BookingAPI.Controllers
             _context.Bookings.Add(booking);
             _context.SaveChanges();
 
+            // Create automatic booking confirmation notification
+            await _notificationService.CreateAsync(
+                booking.UserId,
+                "Booking Confirmed",
+                $"Your booking for {facility.Name} has been confirmed successfully.",
+                NotificationTypes.BookingConfirmed,
+                booking.Id
+            );
+
             return Ok(new
             {
                 Message = "Booking created successfully!",
@@ -85,6 +101,68 @@ namespace BookingAPI.Controllers
                 FacilityName = facility.Name,
                 booking.StartTime,
                 booking.EndTime
+            });
+        }
+
+        [HttpGet("my-bookings")]
+        [Authorize]
+        public IActionResult GetMyBookings()
+        {
+            var userId = User.GetUserId();
+
+            var bookings = _context.Bookings
+                .Where(b => b.UserId == userId)
+                .Select(b => new
+                {
+                    b.Id,
+                    b.FacilityId,
+                    FacilityName = b.Facility.Name,
+                    b.StartTime,
+                    b.EndTime,
+                    b.Status
+                })
+                .ToList();
+
+            return Ok(bookings);
+        }
+
+        [HttpPut("{id}/cancel")]
+        [Authorize]
+        public async Task<IActionResult> CancelBooking(int id)
+        {
+            var userId = User.GetUserId();
+
+            var booking = await _context.Bookings
+                .Include(b => b.Facility)
+                .FirstOrDefaultAsync(b => b.Id == id && b.UserId == userId);
+
+            if (booking == null)
+            {
+                return NotFound("Booking not found.");
+            }
+
+            if (booking.Status == "Cancelled")
+            {
+                return BadRequest("Booking is already cancelled.");
+            }
+
+            booking.Status = "Cancelled";
+
+            await _context.SaveChangesAsync();
+
+            // Create automatic notification
+            await _notificationService.CreateAsync(
+                userId,
+                "Booking Cancelled",
+                $"Your booking for {booking.Facility?.Name} has been cancelled successfully.",
+                NotificationTypes.BookingCancelled,
+                booking.Id
+            );
+
+            return Ok(new
+            {
+                Message = "Booking cancelled successfully.",
+                BookingId = booking.Id
             });
         }
     }
