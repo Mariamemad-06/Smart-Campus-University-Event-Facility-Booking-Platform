@@ -14,6 +14,7 @@ public sealed class FacilityService(BookingDbContext context, INotificationServi
     private static FacilityResponse ToResponse(Facility f) =>
         new(f.Id, f.Name, f.Type, f.Capacity, f.Status, f.Location);
 
+//this is a helper method used to take the info for creating or updating a facility and putting it in the database 
     private static void Apply(Facility facility, FacilityWriteRequest request)
     {
         facility.Name = request.Name.Trim();
@@ -38,7 +39,8 @@ public sealed class FacilityService(BookingDbContext context, INotificationServi
         return ToResponse(facility);
     }
 
-    // Local campus clock: the existing project stores local DateTime booking values.
+    //searches datatable to look for all active reservations of a facility
+    //used to reduce capacities , set facilty to maintenace and permenantley delete facility
     private IQueryable<Booking> ActiveBookings(int facilityId, DateTime now) =>
         context.Bookings.Where(b => b.FacilityId == facilityId &&
             b.Status == "Confirmed" && b.EndTime > now);
@@ -51,8 +53,6 @@ public sealed class FacilityService(BookingDbContext context, INotificationServi
         if (facility is null) return null;
 
         var active = await ActiveBookings(id, DateTime.Now).ToListAsync(ct);
-        // Attendee count is not persisted in the existing Booking model.
-        // Until the booking owner adds it, reject reductions with active reservations.
         if (request.Capacity < facility.Capacity && active.Count > 0)
             throw new FacilityPolicyException(
                 "Capacity cannot be reduced while confirmed upcoming or ongoing bookings exist. The current booking model does not store attendee counts.");

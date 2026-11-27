@@ -14,20 +14,31 @@
                 <div asp-validation-summary="All" class="text-danger" role="alert"></div>
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label asp-for="Keyword" class="form-label">Keyword</label>
+                        <label asp-for="Keyword" class="form-label">Keyword (optional)</label>
                         <input asp-for="Keyword" class="form-control" maxlength="100" placeholder="Name, type or building" />
                     </div>
                     <div class="col-md-6">
-                        <label asp-for="Type" class="form-label">Facility type</label>
-                        <input asp-for="Type" class="form-control" maxlength="100" placeholder="e.g. Lab or Study Room" />
-                        <div class="form-text">Enter the exact facility type.</div>
+                        <label asp-for="Type" class="form-label">
+                            Facility type (optional)
+                        </label>
+                        <select asp-for="Type"
+                                class="form-select"
+                                asp-items="@(new Microsoft.AspNetCore.Mvc.Rendering.SelectList(Model.FacilityTypes))">
+                            <option value="">All facility types</option>
+                        </select>
                     </div>
                     <div class="col-md-6">
-                        <label asp-for="Location" class="form-label">Building / location</label>
-                        <input asp-for="Location" class="form-control" maxlength="100" placeholder="e.g. Building A" />
+                        <label asp-for="Location" class="form-label">
+                            Building / location (optional)
+                        </label>
+                        <select asp-for="Location"
+                                class="form-select"
+                                asp-items="@(new Microsoft.AspNetCore.Mvc.Rendering.SelectList(Model.FacilityLocations))">
+                            <option value="">All locations</option>
+                        </select>
                     </div>
                     <div class="col-md-6">
-                        <label asp-for="Capacity" class="form-label">Minimum capacity</label>
+                        <label asp-for="Capacity" class="form-label">Minimum capacity (optional)</label>
                         <input asp-for="Capacity" type="number" min="1" class="form-control" placeholder="Number of people" />
                     </div>
                     <div class="col-12">

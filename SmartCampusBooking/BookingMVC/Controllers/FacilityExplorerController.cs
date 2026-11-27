@@ -53,7 +53,6 @@ public sealed class FacilityExplorerController(IHttpClientFactory factory) : Con
             }
         }
         else if (hasDate) Add("Date", model.Date);
-        if (!ModelState.IsValid) return View(model);
 
         var token = await HttpContext.GetTokenAsync("access_token");
         if (string.IsNullOrWhiteSpace(token)) return Challenge();
@@ -61,7 +60,56 @@ public sealed class FacilityExplorerController(IHttpClientFactory factory) : Con
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         try
         {
-            using var response = await client.GetAsync(QueryHelpers.AddQueryString("api/facilities/search", query), ct);
+            // Retrieve the complete facility catalog.
+            using var catalogResponse = await client.GetAsync(
+                "api/facilities/search", ct);
+
+            if (catalogResponse.StatusCode == HttpStatusCode.Unauthorized)
+                return Challenge();
+
+            if (catalogResponse.StatusCode == HttpStatusCode.Forbidden)
+                return Forbid();
+
+            if (!catalogResponse.IsSuccessStatusCode)
+            {
+                model.Error = await ReadErrorAsync(catalogResponse, ct);
+                return View(model);
+            }
+
+            var catalog = await catalogResponse.Content
+                .ReadFromJsonAsync<List<FacilityExplorerItem>>(
+                    cancellationToken: ct) ?? new();
+
+            // Populate facility type dropdown.
+            model.FacilityTypes = catalog
+                .Select(f => f.Type)
+                .Where(t => !string.IsNullOrWhiteSpace(t))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(t => t)
+                .ToList();
+
+            // Populate building/location dropdown.
+            model.FacilityLocations = catalog
+                .Select(f => f.Location)
+                .Where(l => !string.IsNullOrWhiteSpace(l))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(l => l)
+                .ToList();
+
+            // Validate before performing the filtered search.
+            if (!ModelState.IsValid)
+                return View(model);
+
+            // Reuse the catalog if no filters were entered.
+            if (query.Count == 0)
+            {
+                model.Facilities = catalog;
+                model.SearchCompleted = true;
+                return View(model);
+            }
+
+            using var response = await client.GetAsync(
+                QueryHelpers.AddQueryString("api/facilities/search", query), ct);
             if (response.StatusCode == HttpStatusCode.Unauthorized) return Challenge();
             if (response.StatusCode == HttpStatusCode.Forbidden) return Forbid();
             if (!response.IsSuccessStatusCode)
