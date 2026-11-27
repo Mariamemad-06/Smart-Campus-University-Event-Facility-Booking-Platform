@@ -8,6 +8,8 @@
 
         public int FacilityId { get; set; }
 
+        public int? NumberOfPeople { get; set; }
+
         public DateTime StartTime { get; set; }
 
         public DateTime EndTime { get; set; }

@@ -53,9 +53,25 @@ public sealed class FacilityService(BookingDbContext context, INotificationServi
         if (facility is null) return null;
 
         var active = await ActiveBookings(id, DateTime.Now).ToListAsync(ct);
-        if (request.Capacity < facility.Capacity && active.Count > 0)
-            throw new FacilityPolicyException(
-                "Capacity cannot be reduced while confirmed upcoming or ongoing bookings exist. The current booking model does not store attendee counts.");
+        if (request.Capacity < facility.Capacity)
+        {
+            if (active.Any(b => !b.NumberOfPeople.HasValue))
+            {
+                throw new FacilityPolicyException(
+                    "Capacity cannot be reduced because an active booking has an unknown attendee count.");
+            }
+
+            var conflictingBooking = active
+                .Where(b => b.NumberOfPeople > request.Capacity)
+                .OrderByDescending(b => b.NumberOfPeople)
+                .FirstOrDefault();
+
+            if (conflictingBooking != null)
+            {
+                throw new FacilityPolicyException(
+                    $"Capacity cannot be reduced to {request.Capacity} because an existing confirmed booking requires {conflictingBooking.NumberOfPeople} people.");
+            }
+        }
 
         // Also resolves any active reservations on an already-maintenance facility.
         var closing = request.Status == "Maintenance" && active.Count > 0;

@@ -76,6 +76,7 @@ namespace BookingAPI.Controllers
             {
                 UserId = request.UserId,
                 FacilityId = request.FacilityId,
+                NumberOfPeople = request.NumberOfPeople,
                 StartTime = startTime,
                 EndTime = endTime,
                 Status = "Confirmed"
