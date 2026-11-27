@@ -1,0 +1,15 @@
+@model BookingMVC.Models.FacilityAdminViewModel
+@{ ViewData["Title"] = "Confirm Deletion"; }
+<div class="container py-4" style="max-width:760px">
+    <div class="card border-0 rounded-4 shadow-sm p-4">
+        <h1 class="h3 fw-bold text-danger">Permanently delete facility?</h1>
+        <p>Facility: <strong>@Model.Name</strong></p>
+        <p class="text-muted">@Model.Type &middot; @Model.Location</p>
+        <div class="alert alert-danger" role="alert">@ViewBag.Warning</div>
+        <p>This action cannot be undone. Historical booking records will also be removed.</p>
+        <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+            <input type="hidden" name="confirmImpact" value="true" />
+            <button class="btn btn-danger">Permanently delete and notify users</button> <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
