@@ -1,0 +1,25 @@
+@model FacilityAdminViewModel
+@{
+    bool editing = ViewBag.IsEdit == true;
+    ViewData["Title"] = editing ? "Edit Facility" : "Add Facility";
+    string action = editing ? "Edit" : "Create";
+}
+<div class="container py-4" style="max-width:760px">
+    <a asp-action="Index" class="text-decoration-none">&larr; Facility Management</a>
+    <div class="card border-0 rounded-4 shadow-sm p-4 mt-3">
+        <h1 class="h3 fw-bold">@ViewData["Title"]</h1>
+        <p class="text-muted">Enter the campus facility details.</p>
+        <form asp-action="@action" asp-route-id="@(editing ? Model.Id : (int?)null)" method="post">
+            <div asp-validation-summary="All" class="text-danger" role="alert"></div>
+            <div class="mb-3"><label asp-for="Name" class="form-label">Facility title</label><input asp-for="Name" class="form-control" required maxlength="100" /><span asp-validation-for="Name" class="text-danger"></span></div>
+            <div class="mb-3"><label asp-for="Location" class="form-label">Building / location</label><input asp-for="Location" class="form-control" required maxlength="100" /><span asp-validation-for="Location" class="text-danger"></span></div>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6"><label asp-for="Type" class="form-label"></label><input asp-for="Type" list="facility-types" class="form-control" required maxlength="100" /><datalist id="facility-types"><option value="Study Room"></option><option value="Lab"></option><option value="Lecture Hall"></option><option value="Equipment"></option></datalist><span asp-validation-for="Type" class="text-danger"></span></div>
+                <div class="col-md-6"><label asp-for="Capacity" class="form-label"></label><input asp-for="Capacity" type="number" min="1" class="form-control" required /><span asp-validation-for="Capacity" class="text-danger"></span></div>
+            </div>
+            <div class="mb-3"><label asp-for="Status" class="form-label"></label><select asp-for="Status" class="form-select"><option value="Available">Available</option><option value="Maintenance">Maintenance</option></select><span asp-validation-for="Status" class="text-danger"></span></div>
+            @if(editing) { <p class="small text-muted">Maintenance may cancel reservations. The system will ask for confirmation when bookings are affected.</p> }
+            <button class="btn btn-primary">Save Facility</button> <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+        </form>
+    </div>
+</div>

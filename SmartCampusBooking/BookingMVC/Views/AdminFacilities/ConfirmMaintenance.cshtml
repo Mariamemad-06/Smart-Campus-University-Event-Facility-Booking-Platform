@@ -1,0 +1,15 @@
+@model FacilityAdminViewModel
+@{ ViewData["Title"] = "Confirm Maintenance"; }
+<div class="container py-4" style="max-width:760px">
+    <div class="card border-0 rounded-4 shadow-sm p-4">
+        <h1 class="h3 fw-bold">Confirm maintenance</h1>
+        <p>Facility: <strong>@Model.Name</strong></p>
+        <div class="alert alert-warning" role="alert">@ViewBag.Warning</div>
+        <p>Affected reservations will not be restored automatically when the facility reopens.</p>
+        <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+            <input type="hidden" name="confirmImpact" value="true" />
+            <input asp-for="Name" type="hidden" /><input asp-for="Type" type="hidden" /><input asp-for="Capacity" type="hidden" /><input asp-for="Status" type="hidden" /><input asp-for="Location" type="hidden" />
+            <button class="btn btn-warning">Confirm maintenance and notify users</button> <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Cancel</a>
+        </form>
+    </div>
+</div>

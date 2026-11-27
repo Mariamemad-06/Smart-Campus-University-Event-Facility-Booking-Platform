@@ -1,0 +1,10 @@
+@model FacilityAdminViewModel
+@{ ViewData["Title"] = "Facility Details"; }
+<div class="container py-4" style="max-width:760px">
+    <a asp-action="Index" class="text-decoration-none">&larr; Facility Management</a>
+    <div class="card border-0 rounded-4 shadow-sm p-4 mt-3">
+        <div class="d-flex justify-content-between align-items-center gap-2"><h1 class="h3 fw-bold">@Model.Name</h1><span class="badge @(Model.Status == "Available" ? "bg-success" : "bg-warning text-dark")">@Model.Status</span></div>
+        <dl class="row mt-3"><dt class="col-sm-4">Facility ID</dt><dd class="col-sm-8">@Model.Id</dd><dt class="col-sm-4">Type</dt><dd class="col-sm-8">@Model.Type</dd><dt class="col-sm-4">Building / location</dt><dd class="col-sm-8">@Model.Location</dd><dt class="col-sm-4">Capacity</dt><dd class="col-sm-8">@Model.Capacity</dd></dl>
+        <div class="d-flex gap-2"><a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a><form asp-action="Delete" asp-route-id="@Model.Id" method="post"><button class="btn btn-outline-danger">Delete</button></form></div>
+    </div>
+</div>
