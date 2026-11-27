@@ -149,12 +149,38 @@ public sealed class AdminFacilitiesController(IHttpClientFactory factory) : Cont
             var error = await ErrorAsync(response);
             if (response.StatusCode == HttpStatusCode.Conflict && !confirmImpact && error.StartsWith("Permanent deletion", StringComparison.Ordinal))
             {
+                // Retrieve facility details before displaying confirmation.
+                using var detailsResponse = await client.GetAsync($"{Endpoint}/{id}");
+
+                if (detailsResponse.StatusCode == HttpStatusCode.Unauthorized)
+                    return Challenge();
+
+                if (detailsResponse.StatusCode == HttpStatusCode.Forbidden)
+                    return Forbid();
+
+                if (detailsResponse.StatusCode == HttpStatusCode.NotFound)
+                    return NotFound();
+
+                if (!detailsResponse.IsSuccessStatusCode)
+                {
+                    TempData["FacilityError"] = await ErrorAsync(detailsResponse);
+                    return RedirectToAction(nameof(Index));
+                }
+
+                var facility = await detailsResponse.Content
+                    .ReadFromJsonAsync<FacilityAdminViewModel>();
+
+                if (facility == null)
+                    return NotFound();
+
                 ViewBag.Warning = error;
-                return View("ConfirmDelete", id);
+                return View("ConfirmDelete", facility);
             }
+
             TempData["FacilityError"] = error;
             return RedirectToAction(nameof(Index));
         }
+
         TempData["FacilitySuccess"] = "Facility permanently deleted.";
         return RedirectToAction(nameof(Index));
     }

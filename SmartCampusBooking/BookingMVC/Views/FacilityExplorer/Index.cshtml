@@ -1,0 +1,109 @@
+@model FacilityExplorerViewModel
+@using System.Globalization
+@{
+    ViewData["Title"] = "Explore Facilities";
+    var culture = CultureInfo.GetCultureInfo("en-US");
+}
+<div class="container py-4">
+    <a asp-controller="Home" asp-action="Index" class="text-decoration-none">&larr; Dashboard</a>
+    <h1 class="fw-bold mt-3">Explore Facilities</h1>
+    <p class="text-muted">Find campus rooms, labs and equipment. Campus operating hours: 8 AM – 8 PM.</p>
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-4">
+            <form asp-controller="FacilityExplorer" asp-action="Index" method="get">
+                <div asp-validation-summary="All" class="text-danger" role="alert"></div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="Keyword" class="form-label">Keyword</label>
+                        <input asp-for="Keyword" class="form-control" maxlength="100" placeholder="Name, type or building" />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Type" class="form-label">Facility type</label>
+                        <input asp-for="Type" class="form-control" maxlength="100" placeholder="e.g. Lab or Study Room" />
+                        <div class="form-text">Enter the exact facility type.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Location" class="form-label">Building / location</label>
+                        <input asp-for="Location" class="form-control" maxlength="100" placeholder="e.g. Building A" />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Capacity" class="form-label">Minimum capacity</label>
+                        <input asp-for="Capacity" type="number" min="1" class="form-control" placeholder="Number of people" />
+                    </div>
+                    <div class="col-12">
+                        <label asp-for="Date" class="form-label">Date (optional)</label>
+                        <input asp-for="Date" type="date" class="form-control" />
+                        <div class="form-text">Select a date to see all free intervals. Leave both times empty for a whole-day search.</div>
+                    </div>
+                    <div class="col-6">
+                        <label asp-for="StartTime" class="form-label">Start time (optional)</label>
+                        <input asp-for="StartTime" type="time" class="form-control" />
+                    </div>
+                    <div class="col-6">
+                        <label asp-for="EndTime" class="form-label">End time (optional)</label>
+                        <input asp-for="EndTime" type="time" class="form-control" />
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">Search Facilities</button>
+                        <a asp-controller="FacilityExplorer" asp-action="Index" class="btn btn-outline-secondary">Reset</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    @if (!string.IsNullOrWhiteSpace(Model.Error))
+    {
+        <div class="alert alert-danger" role="alert">@Model.Error</div>
+    }
+    @if (Model.SearchCompleted)
+    {
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h5 mb-0">Search results</h2>
+            <span class="text-muted">@Model.Facilities.Count matching facilities</span>
+        </div>
+        @if (Model.Facilities.Count == 0)
+        {
+            <div class="alert alert-info">No matching facilities. Try changing the filters or requested time.</div>
+        }
+        @foreach (var facility in Model.Facilities)
+        {
+            var available = facility.Status == "Available";
+            <article class="card border-0 shadow-sm rounded-4 mb-3">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start gap-2">
+                        <h3 class="h5 fw-bold">@facility.Name</h3>
+                        <span class="badge @(available ? "bg-success" : "bg-warning text-dark")">@facility.Status</span>
+                    </div>
+                    <p class="text-muted mb-2">@facility.Type &middot; @facility.Location</p>
+                    <p class="mb-3">Capacity: <strong>@facility.Capacity people</strong> &middot; Facility ID: <strong>@facility.Id</strong></p>
+                    @if (facility.AvailableSlots is { Count: > 0 })
+                    {
+                        <h4 class="h6">Available time intervals</h4>
+                        <ul class="list-group list-group-flush mb-3">
+                            @foreach (var slot in facility.AvailableSlots)
+                            {
+                                <li class="list-group-item px-0 text-success">
+                                    @slot.StartTime.ToString("dd MMM yyyy", culture) &middot;
+                                    @slot.StartTime.ToString("h:mm tt", culture) – @slot.EndTime.ToString("h:mm tt", culture)
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else if (available)
+                    {
+                        <p class="small text-muted">Select a date to check actual time availability.</p>
+                    }
+                    @if (available)
+                    {
+                        <a asp-controller="Bookings" asp-action="Create" class="btn btn-outline-primary">Open Booking Form</a>
+                        <p class="form-text mb-0">Use facility ID @facility.Id and your chosen date and time in the existing booking form. Availability can change before confirmation.</p>
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0">This facility cannot currently be booked.</p>
+                    }
+                </div>
+            </article>
+        }
+    }
+</div>
